@@ -2,6 +2,7 @@ module Homework exposing
     ( bird
     , bird2
     , bird3
+    , buildStatsUrl
     , catMaybes
     , convert
     , convert02
@@ -9,6 +10,9 @@ module Homework exposing
     , mapMaybes
     , setPhone
     )
+
+
+import Url.Builder exposing (string)
 
 
 convert :
@@ -127,3 +131,18 @@ mapMaybes =
 catMaybes : List (Maybe a) -> List a
 catMaybes =
     List.filterMap identity
+
+
+buildStatsUrl : Int -> { startDate : Maybe String, numElems : Maybe Int } -> String
+buildStatsUrl itemId ps =
+    let
+        nElements =
+            Maybe.map (\n -> string "start_date" (String.fromInt n)) ps.numElems
+
+        stDate =
+            Maybe.map (\d -> string "start_date" d) ps.startDate
+
+        params =
+            catMaybes [ nElements, stDate ]
+    in
+    Url.Builder.crossOrigin "https://myapi.com" [ "api", "item", String.fromInt itemId, "stats.json" ] params
