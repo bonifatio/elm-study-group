@@ -9,8 +9,7 @@ module Homework exposing
     , updateListKv
     )
 
-import Date exposing (Date)
-
+import Date exposing (fromIsoString, Date)
 
 maybeToList : Maybe a -> List a
 maybeToList x =
@@ -25,7 +24,7 @@ updateList shouldChange f xs =
                 f x
 
             else
-                Nothing
+                Just x
         )
         xs
 
@@ -34,11 +33,11 @@ find : (a -> Bool) -> List a -> Maybe a
 find f xss =
     case xss of
         [] ->
-            Just False
+            Nothing
 
         head :: tail ->
             if f head then
-                Just True
+                Just head
 
             else
                 find f tail
@@ -56,7 +55,7 @@ updateListKv old k f =
                 Maybe.map (\x -> ( key, x )) (f value)
 
             else
-                Just ( k, value )
+                Just ( key, value )
         )
         old
 
@@ -73,9 +72,14 @@ mapOk f res =
 
 either : (a -> c) -> (b -> c) -> Result a b -> c
 either fa fb res =
-    Result.mapError fa (Result.map fb res)
+    case res of
+        Ok r ->
+            fb r
+
+        Err l ->
+            fa l
 
 
 parseDate : Maybe String -> Maybe Date
 parseDate v =
-    Debug.todo ""
+    Maybe.andThen (\x -> Result.toMaybe (Date.fromIsoString x)) v
